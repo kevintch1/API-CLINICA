@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  RECEPCIONISTA
+  MEDICO
+  GERENCIA
+}
+
+enum AppointmenStatus {
+  PROGRAMADA
+  COMPLETADA
+  CANCELADA
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  doctor Doctor?
+}
+
+model Speciality {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  doctors Doctor[]
+}
+
+model Doctor {
+  id           String        @id @default(uuid())
+  name         String
+  lastName     String
+  specialityId String
+  userId       String        @unique
+  appointments Appointment[]
+
+  speciality Speciality @relation(fields: [specialityId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+}
+
+model Patient {
+  id           String        @id @default(uuid())
+  name         String
+  lastName     String
+  email        String        @unique
+  phone        String
+  birthDate    DateTime
+  createdAt    DateTime      @default(now())
+  address      String
+  appointments Appointment[]
+}
+
+model Appointment {
+  id        String           @id @default(uuid())
+  date      DateTime
+  status    AppointmenStatus @default(PROGRAMADA)
+  patientID String
+  doctorId  String
+  createdAt DateTime         @default(now())
+
+  patient Patient @relation(fields: [patientID], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+}
