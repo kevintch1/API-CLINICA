@@ -25,54 +25,73 @@ enum AppointmenStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   role      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  doctor Doctor?
+  doctor  Doctor?
+  patient Patient?
 }
 
 model Speciality {
-  id      String   @id @default(uuid())
+  id      Int      @id @default(autoincrement())
   name    String   @unique
   doctors Doctor[]
 }
 
 model Doctor {
-  id           String        @id @default(uuid())
+  id           Int              @id @default(autoincrement())
   name         String
   lastName     String
-  specialityId String
-  userId       String        @unique
+  specialityId Int
+  userId       Int              @unique
+  activo       Boolean          @default(true)
   appointments Appointment[]
-
-  speciality Speciality @relation(fields: [specialityId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
+  schedules    DoctorSchedule[]
+  speciality   Speciality       @relation(fields: [specialityId], references: [id])
+  user         User             @relation(fields: [userId], references: [id])
 }
 
 model Patient {
-  id           String        @id @default(uuid())
-  name         String
-  lastName     String
-  email        String        @unique
-  phone        String
-  birthDate    DateTime
-  createdAt    DateTime      @default(now())
-  address      String
+  id        Int      @id @default(autoincrement())
+  name      String
+  lastName  String
+  email     String   @unique
+  phone     String
+  birthDate DateTime
+  createdAt DateTime @default(now())
+  address   String
+  userId    Int?     @unique
+
+  user         User?         @relation(fields: [userId], references: [id])
   appointments Appointment[]
 }
 
 model Appointment {
-  id        String           @id @default(uuid())
+  id        Int              @id @default(autoincrement())
   date      DateTime
   status    AppointmenStatus @default(PROGRAMADA)
-  patientID String
-  doctorId  String
+  patientID Int
+  doctorId  Int
   createdAt DateTime         @default(now())
 
   patient Patient @relation(fields: [patientID], references: [id])
   doctor  Doctor  @relation(fields: [doctorId], references: [id])
+}
+
+model DoctorSchedule {
+  id           Int     @id @default(autoincrement())
+  doctorId     Int
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  slotDuration Int     @default(30)
+  activo       Boolean @default(true)
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId, dayOfWeek])
 }
