@@ -108,6 +108,7 @@ export async function obtenerHistorial(req: Request, res: Response) {
 
 export async function obtenerMisCitas(req: Request, res: Response) {
     try {
+        // saber que hace
         const userId = res.locals.usuario.id;
 
         const paciente = await obtenerCitasPorUsuario(userId);
